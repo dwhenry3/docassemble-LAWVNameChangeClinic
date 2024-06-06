@@ -238,9 +238,7 @@ subquestion: |
   ${ prog_open(name_change_step_one) }
 attachment code: name_change_documents
 manual attachment list: True
-allow emailing: True
-email address default: |
-  ${ p.email }
+allow emailing: False
 allow downloading: True
 always include editable files: True
 zip filename: Name_Change_Packet.zip
@@ -358,11 +356,24 @@ content: |
   * <i class="file-pdf"></i> Order of Publication
   * <i class="file-pdf"></i> Order
 
-  Below you will find a button to download all the files as a single PDF 
-  **OR**
-  you can choose the option further below to download all the .docx Word files
+  Below you will find a button to download all the files as a single PDF, email that PDF to the client, **OR** you can choose the option further below to download all the .docx Word files if edits are needed.
 
   ${ action_button_html(name_change_bundle.url_for(), classname='btn btn-da btn-primary', label='Download PDF Packet', icon='file-pdf') }
+  ${ action_button_html(url_action('send_name_change_files'), classname='btn btn-da btn-primary', label='Email these to me', icon='envelope') }
+---
+event: send_name_change_files
+code: |
+  send_email(to=p, attachments=name_change_bundle,template=email_all_files)
+---
+template: email_all_files
+subject: |
+  Name Change Packet
+content: |
+  Your document packet is attached.  Included in the packet are instructions for the next steps.
+
+  Additional information can always be found at [Legal Aid of West Virginia](https://legalaidwv.org/).
+
+  *NOTE: This email address is not monitored.  Please do not reply to this message.*
 ---
 mandatory: true
 code: |
