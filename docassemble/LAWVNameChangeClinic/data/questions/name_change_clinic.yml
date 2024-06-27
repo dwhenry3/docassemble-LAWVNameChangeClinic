@@ -8,7 +8,7 @@ metadata:
   authors:
     - name: Dane W. Henry, Esq.
       organization: Legal Aid of West Virginia, Inc.
-  revision_date: 2024-06-06
+  revision_date: 2024-06-27
   unlisted: True
 ---
 features:
@@ -32,6 +32,7 @@ objects:
   - p: Individual
   - birth: Individual
   - new_name: Individual
+  - court_preference: DADict
 ---
 features:
   question back button: True
@@ -80,6 +81,9 @@ fields:
   - First Name: p.name.first
   - Middle Name: p.name.middle
   - Last Name: p.name.last
+  - Suffix: p.name.suffix
+    required: False
+    code: name_suffix()
   - Birthdate: p.birthdate
     datatype: date
     max: ${ today().minus(years=18) }
@@ -147,6 +151,12 @@ fields:
     show if:
       variable: name_at_birth
       is: False
+  - Suffix at Birth: birth.name.suffix
+    required: False
+    code: name_suffix()
+    show if:
+      variable: name_at_birth
+      is: False
 ---
 ga id: nameChangeNewName
 question: |
@@ -155,6 +165,9 @@ fields:
   - First: new_name.name.first
   - Middle: new_name.name.middle
   - Last: new_name.name.last
+  - Suffix at Birth: new_name.name.suffix
+    required: False
+    code: name_suffix()
 ---
 question: |
   Please provide a detailed reasoning for seeking a name change.
@@ -270,11 +283,10 @@ attachment:
 attachment:
   - name: ${ p.name.full(middle="full") } Civil Case Information Statement
     filename: ${ p.name.full(middle="full") } Civil Case Information Statement
-    pdf template file: docassemble.LAWVCommon:data/templates/dual_civil_case_info.pdf
+    pdf template file: docassemble.LAWVCommon:data/templates/civil_case_info.pdf
     editable: False
     variable name: civil_information_statement
     fields:
-      - court: ${ court }
       - upper_county: ${ upper_county }
       - full_name: ${ p.name.full(middle="full") }
       - address: ${ p.address.line_one() }
@@ -302,6 +314,38 @@ attachment:
       - accom_other: |
           ${accom_other if accommodations and accom_detail['other'] else ''}
       - without_attorney: Yes
+---
+attachment:
+  - name: ${ p.name.full(middle="full") } Civil Case Information Statement
+    filename: ${ p.name.full(middle="full") } Civil Case Information Statement
+    pdf template file: docassemble.LAWVCommon:data/templates/dom_civil_case_info.pdf
+    editable: False
+    variable name: domestic_civil_information_statement
+    fields:
+      - "upper_county": ${ upper_county }
+      - "full_name": ${ p.name.full(middle="full") }
+      - "confidential": No
+      - "address": ${ p.address.line_one() }
+      - "second_address_line": ${ p.address.line_two() }
+      - "p_phone": ${ p.phone_number }
+      - "p_dob": ${ p.birthdate }
+      - "accommodations": |
+          ${'yes' if accommodations else 'no'}
+      - "wheelchair": |
+          ${accom_detail['wheelchair'] if accommodations else 'No'}
+      - "interpreter": |
+          ${accom_detail['hearing'] if accommodations else 'No'}
+      - "reader": |
+          ${accom_detail['visual'] if accommodations else 'No'}
+      - "spokesperson": |
+          ${accom_detail['speech'] if accommodations else 'No'}
+      - "other_detail": |
+          ${accom_other if accommodations and accom_detail['other'] else ''}
+      - "other": |
+          ${accom_detail['other'] if accommodations else 'No'}
+      - "other_relief": Yes
+      - "other_relief_detail": "Adult Name Change"
+      - "attorney": "no"
 ---
 attachment:
   - name: ${ p.name.full(middle="full") } Name Change Petition
@@ -347,7 +391,7 @@ template: name_change_step_one
 subject: |
   Step One: Download or Email
 content: |
-  Here is the collection of documents in your packet:
+  Here are the documents in your packet:
 
   * <i class="file-pdf"></i> Instructions
   * <i class="file-pdf"></i> Case Information Statement
@@ -406,10 +450,8 @@ code: |
     p.address.county = p.address.county.capitalize()
     upper_county = p.address.county.upper()
 
-    if upper_county == "CABELL" or upper_county == "PRESTON":
-      court = "FAMILY"
-    else:
-      court
+    ## Setting Family/Circuit
+    court = court_preference[upper_county]
 
     ## Library
     p.address.geocode()
@@ -438,10 +480,16 @@ code: |
 ---
 code: |
   name_change_documents = [name_change_instructions]
-  name_change_documents.append(civil_information_statement)
+  if court == "CIRCUIT":
+    name_change_documents.append(civil_information_statement)
+  else:
+    name_change_documents.append(domestic_civil_information_statement)
   name_change_documents.append(name_change_petition)
   name_change_documents.append(name_change_order_filing_petition)
   name_change_documents.append(name_change_order_of_publication)
   name_change_documents.append(name_change_order)
 
   name_change_bundle = pdf_concatenate(name_change_documents, filename=p.name.full(middle="full") + "Name Change Packet.pdf")
+---
+code : |
+  court_preference = {"BARBOUR":"FAMILY","BERKELEY":"CIRCUIT","BOONE":"FAMILY","BRAXTON":"CIRCUIT","BROOKE":"CIRCUIT","CABELL":"FAMILY","CALHOUN":"CIRCUIT","CLAY":"CIRCUIT","DODDRIDGE":"CIRCUIT","FAYETTE":"CIRCUIT","GILMER":"CIRCUIT","GRANT":"CIRCUIT","GREENBRIER":"FAMILY","HAMPSHIRE":"CIRCUIT","HANCOCK":"CIRCUIT","HARDY":"CIRCUIT","HARRISON":"FAMILY","JACKSON":"CIRCUIT","JEFFERSON":"FAMILY","KANAWHA":"CIRCUIT","LEWIS":"CIRCUIT","LINCOLN":"CIRCUIT","LOGAN":"CIRCUIT","MARION":"CIRCUIT","MARSHALL":"CIRCUIT","MASON":"FAMILY","MCDOWELL":"CIRCUIT","MERCER":"CIRCUIT","MINERAL":"CIRCUIT","MINGO":"FAMILY","MONONGALIA":"CIRCUIT","MONROE":"CIRCUIT","MORGAN":"FAMILY","NICHOLAS":"FAMILY","OHIO":"CIRCUIT","PENDLETON":"FAMILY","PLEASANTS":"CIRCUIT","POCAHONTAS":"FAMILY","PRESTON":"FAMILY","PUTNAM":"CIRCUIT","RALEIGH":"FAMILY","RANDOLPH":"CIRCUIT","RITCHIE":"CIRCUIT","ROANE":"CIRCUIT","SUMMERS":"CIRCUIT","TAYLOR":"CIRCUIT","TUCKER":"FAMILY","TYLER":"CIRCUIT","UPSHUR":"CIRCUIT","WAYNE":"CIRCUIT","WEBSTER":"CIRCUIT","WETZEL":"CIRCUIT","WIRT":"CIRCUIT","WOOD":"CIRCUIT","WYOMING":"CIRCUIT"}
