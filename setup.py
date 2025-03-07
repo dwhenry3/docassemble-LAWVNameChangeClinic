@@ -1,6 +1,6 @@
 import os
 import sys
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 from fnmatch import fnmatchcase
 from distutils.util import convert_path
 
@@ -44,7 +44,7 @@ def find_package_data(where='.', package='', exclude=standard_exclude, exclude_d
     return out
 
 setup(name='docassemble.LAWVNameChangeClinic',
-      version='1.0.5',
+      version='1.0.6',
       description=('A docassemble extension.'),
       long_description='A guided interview for creating an adult Name Change Petition Packet for a LAWV Name Change Clinic. The interview assumes that it is going to be completed by an attorney or paralegal assisting in the clinic.  The interview produces PDF and Word documents to allow for final edits.',
       long_description_content_type='text/markdown',
@@ -52,8 +52,7 @@ setup(name='docassemble.LAWVNameChangeClinic',
       author_email='dhenry@lawv.net',
       license='The MIT License (MIT)',
       url='https://docassemble.org',
-      packages=find_packages(),
-      namespace_packages=['docassemble'],
+      packages=find_namespace_packages(),
       install_requires=['docassemble.LAWVCommon>=1.0.12'],
       zip_safe=False,
       package_data=find_package_data(where='docassemble/LAWVNameChangeClinic/', package='docassemble.LAWVNameChangeClinic'),

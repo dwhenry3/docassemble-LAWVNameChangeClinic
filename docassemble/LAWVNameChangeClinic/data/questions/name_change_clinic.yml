@@ -50,7 +50,7 @@ ga id: nameChangeResidency
 question: |
   Have you lived in your county for at least one year?
 subquestion: |
-  In order to be eilgible for a name change, you must file
+  In order to be eligible for a name change, you must file
   in the county and state where you have lived for at least one year.
 yesno: residency
 ---
