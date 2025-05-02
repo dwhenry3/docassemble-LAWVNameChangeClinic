@@ -8,7 +8,7 @@ metadata:
   authors:
     - name: Dane W. Henry, Esq.
       organization: Legal Aid of West Virginia, Inc.
-  revision_date: 2024-06-27
+  revision_date: 2025-05-02
   unlisted: True
 ---
 features:
@@ -444,6 +444,7 @@ code: |
         command('restart')
     change_reason
     p.name.first
+    p.address.geocode()
 
     ## County
     p.address.county = p.address.county.rsplit(" ")[0]
@@ -451,10 +452,9 @@ code: |
     upper_county = p.address.county.upper()
 
     ## Setting Family/Circuit
-    court = court_preference[upper_county]
+    court = name_change_court[p.address.county]
 
     ## Library
-    p.address.geocode()
     cords = (p.address.location.latitude,p.address.location.longitude)
     for library in libraries:
       distance = geopy.distance.geodesic(cords, (libraries[library]["lat"], libraries[library]["long"])).miles
@@ -490,6 +490,3 @@ code: |
   name_change_documents.append(name_change_order)
 
   name_change_bundle = pdf_concatenate(name_change_documents, filename=p.name.full(middle="full") + "Name Change Packet.pdf")
----
-code : |
-  court_preference = {"BARBOUR":"FAMILY","BERKELEY":"CIRCUIT","BOONE":"FAMILY","BRAXTON":"CIRCUIT","BROOKE":"CIRCUIT","CABELL":"FAMILY","CALHOUN":"CIRCUIT","CLAY":"CIRCUIT","DODDRIDGE":"CIRCUIT","FAYETTE":"CIRCUIT","GILMER":"CIRCUIT","GRANT":"CIRCUIT","GREENBRIER":"FAMILY","HAMPSHIRE":"CIRCUIT","HANCOCK":"CIRCUIT","HARDY":"CIRCUIT","HARRISON":"FAMILY","JACKSON":"CIRCUIT","JEFFERSON":"FAMILY","KANAWHA":"CIRCUIT","LEWIS":"CIRCUIT","LINCOLN":"CIRCUIT","LOGAN":"CIRCUIT","MARION":"CIRCUIT","MARSHALL":"CIRCUIT","MASON":"FAMILY","MCDOWELL":"CIRCUIT","MERCER":"CIRCUIT","MINERAL":"CIRCUIT","MINGO":"FAMILY","MONONGALIA":"CIRCUIT","MONROE":"CIRCUIT","MORGAN":"FAMILY","NICHOLAS":"FAMILY","OHIO":"CIRCUIT","PENDLETON":"FAMILY","PLEASANTS":"CIRCUIT","POCAHONTAS":"FAMILY","PRESTON":"FAMILY","PUTNAM":"CIRCUIT","RALEIGH":"FAMILY","RANDOLPH":"CIRCUIT","RITCHIE":"CIRCUIT","ROANE":"CIRCUIT","SUMMERS":"CIRCUIT","TAYLOR":"CIRCUIT","TUCKER":"FAMILY","TYLER":"CIRCUIT","UPSHUR":"CIRCUIT","WAYNE":"CIRCUIT","WEBSTER":"CIRCUIT","WETZEL":"CIRCUIT","WIRT":"CIRCUIT","WOOD":"CIRCUIT","WYOMING":"CIRCUIT"}
